@@ -51,8 +51,6 @@ pub fn palette(dark: bool) -> Palette {
     }
 }
 
-pub const CLAUDE_ORANGE: Rgba = Rgba(0.851, 0.467, 0.341, 1.0); // #D97757
-
 /// One account's numbers.
 pub struct Row {
     pub five: Option<f64>,
@@ -391,46 +389,4 @@ fn rounded_rect_cov(x: f32, y: f32, l: f32, t: f32, r: f32, b: f32, rad: f32) ->
     let cy = y.clamp(t + rad, b - rad);
     let d = ((x - cx).powi(2) + (y - cy).powi(2)).sqrt() - rad;
     (0.5 - d).clamp(0.0, 1.0)
-}
-
-/// Claude's asterisk-like mark: 12 rounded spokes of slightly varying length.
-fn draw_mark(size: i32) -> Vec<f32> {
-    const SS: i32 = 4; // supersampling
-    let n = 12;
-    let c = size as f32 / 2.0;
-    let r = size as f32 / 2.0;
-    let lens = [1.0, 0.82, 0.95, 0.78, 1.0, 0.86, 0.92, 0.8, 0.98, 0.84, 0.9, 0.8];
-    let half_w = (size as f32 * 0.052).max(0.8);
-    let spokes: Vec<(f32, f32)> = (0..n)
-        .map(|i| {
-            let a = (i as f32) * std::f32::consts::TAU / n as f32 + 0.13;
-            let len = (r - half_w) * lens[i as usize];
-            (a.cos() * len, a.sin() * len)
-        })
-        .collect();
-    let mut out = vec![0f32; (size * size) as usize];
-    for y in 0..size {
-        for x in 0..size {
-            let mut hits = 0;
-            for sy in 0..SS {
-                for sx in 0..SS {
-                    let px = x as f32 + (sx as f32 + 0.5) / SS as f32 - c;
-                    let py = y as f32 + (sy as f32 + 0.5) / SS as f32 - c;
-                    let inside = spokes.iter().any(|&(ex, ey)| {
-                        // distance from point to segment (0,0)-(ex,ey)
-                        let t = ((px * ex + py * ey) / (ex * ex + ey * ey)).clamp(0.0, 1.0);
-                        let (dx, dy) = (px - ex * t, py - ey * t);
-                        // taper: thinner toward the tip
-                        let hw = half_w * (1.0 + 0.25 * t);
-                        dx * dx + dy * dy <= hw * hw
-                    });
-                    if inside {
-                        hits += 1;
-                    }
-                }
-            }
-            out[(y * size + x) as usize] = hits as f32 / (SS * SS) as f32;
-        }
-    }
-    out
 }

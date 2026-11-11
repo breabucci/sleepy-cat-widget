@@ -6,6 +6,9 @@
 //! moves aside to `<name>.old`, the new one takes its name, and the new one is
 //! started. It deletes the `.old` file once this process has exited.
 
+// Kept (switched off in `check`) so updates can later point at our own repo.
+#![allow(dead_code)]
+
 use crate::http;
 use serde_json::Value;
 use std::fs;
