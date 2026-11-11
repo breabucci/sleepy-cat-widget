@@ -1,0 +1,18 @@
+# Builds the widget on GitHub's own Windows machine every time code is pushed.
+# The finished exe shows up under the run in the Actions tab ("Artifacts").
+name: Build
+
+on:
+  push:
+  workflow_dispatch: # also adds a "Run workflow" button
+
+jobs:
+  build:
+    runs-on: windows-latest   # a fresh Windows PC with Rust + Microsoft's build tools
+    steps:
+      - uses: actions/checkout@v4          # 1. download this repo's code
+      - run: cargo build --release          # 2. compile it (the real build, not just a check)
+      - uses: actions/upload-artifact@v4   # 3. hand back the exe
+        with:
+          name: sleepy-cat-widget
+          path: target/release/claude-usage-widget.exe

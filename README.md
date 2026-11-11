@@ -1,3 +1,7 @@
+> **Sleepy-cat fork.** A little black cat replaces the Claude mark and gets sleepier as your
+> 5-hour usage climbs (awake → yawning → droopy → asleep → out cold). Self-updates are off.
+> Original widget by [AbdoSarmini](https://github.com/AbdoSarmini/claude-usage-widget-for-windows-taskbar) (MIT).
+
 # Claude Usage Widget For Windows Taskbar
 
 See your Claude **5-hour** and **weekly** usage right on the Windows 11 taskbar, next to the clock.
