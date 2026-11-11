@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod api;
+mod cat;
 mod http;
 mod render;
 mod update;
@@ -1059,7 +1060,7 @@ unsafe fn show_menu() {
         AppendMenuW(fonts, check(*px == font_size), ID_FONT_BASE + i, wide(label).as_ptr());
     }
     AppendMenuW(custom, MF_POPUP, fonts as usize, w!("Font size"));
-    AppendMenuW(custom, check(hide_icon), ID_HIDE_ICON, w!("Hide Claude icon"));
+    AppendMenuW(custom, check(hide_icon), ID_HIDE_ICON, w!("Hide cat"));
     AppendMenuW(custom, check(hide_labels), ID_HIDE_LABELS, w!("Hide 5h / W labels"));
     // Only matters with more than one account.
     let (per_col, n_accounts) = with(|s| (s.rows_per_col, s.accounts.len()));

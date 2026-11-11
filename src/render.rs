@@ -4,6 +4,7 @@
 //! and its brightness becomes coverage, then tinted. The Claude mark is drawn
 //! analytically (supersampled capsules), so it stays crisp at any DPI.
 
+use crate::cat;
 use crate::http::wide;
 use windows_sys::Win32::Foundation::{RECT, SIZE};
 use windows_sys::Win32::Graphics::Gdi::*;
@@ -194,7 +195,11 @@ pub fn render(m: &Model, h: i32, scale: f32) -> Frame {
         let dim = |stale: bool, c: Rgba| if stale { Rgba(c.0, c.1, c.2, c.3 * 0.5) } else { c };
         let all_stale = rows.iter().all(|r| r.stale);
         let pad_l = s(8.0);
-        let icon = if m.hide_icon { 0 } else { s(18.0) };
+        // The cat fills ~60% of the taskbar's height, in whole-pixel steps
+        // (2x, 3x...) so the pixel art never blurs.
+        let cell = ((h as f32 * 0.6) / cat::GRID as f32).round().max(1.0) as i32;
+        let cell = cell.min(h / cat::GRID).max(1);
+        let icon = if m.hide_icon { 0 } else { cat::GRID * cell };
         let gap_icon = if m.hide_icon { 0 } else { s(7.0) };
         let gap_lv = if m.hide_labels { 0 } else { s(5.0) };
         let gap_div = s(10.0);
@@ -337,13 +342,18 @@ pub fn render(m: &Model, h: i32, scale: f32) -> Frame {
             }
         }
 
-        // Claude mark.
-        let iy = (h - icon) / 2;
-        let mark = draw_mark(icon);
-        for y in 0..icon {
-            for xx in 0..icon {
-                let cov = mark[(y * icon + xx) as usize];
-                over(&mut buf, ((iy + y) * w + icon_x + xx) as usize, dim(all_stale, CLAUDE_ORANGE), cov);
+        // The cat: sleepier the more of the 5-hour window is used. With
+        // several accounts, the busiest one decides.
+        if icon > 0 {
+            let used = rows.iter().filter_map(|r| r.five).reduce(f64::max);
+            let iy = (h - icon) / 2;
+            let px = cat::draw(cat::stage(used), cell);
+            for y in 0..icon {
+                for xx in 0..icon {
+                    if let Some(c) = px[(y * icon + xx) as usize] {
+                        over(&mut buf, ((iy + y) * w + icon_x + xx) as usize, dim(all_stale, c), 1.0);
+                    }
+                }
             }
         }
 
