@@ -40,8 +40,11 @@ pub fn releases_page() -> String {
 }
 
 /// Returns the latest release if it's newer than this build.
+///
+/// Sleepy-cat fork: always "no update". The original checks the upstream
+/// repo, whose release is the plain widget and would replace the cat.
 pub fn check() -> Result<Option<Release>, String> {
-    check_newer_than(env!("CARGO_PKG_VERSION"))
+    Ok(None)
 }
 
 fn check_newer_than(current: &str) -> Result<Option<Release>, String> {
